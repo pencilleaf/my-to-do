@@ -1,4 +1,4 @@
-//
+ //
 //  ContentView.swift
 //  MyToDo
 //
@@ -9,8 +9,38 @@
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(\.managedObjectContext) var managedObjectContext
+    @FetchRequest(fetchRequest: ToDoItem.getAllToDoItems()) var toDoItems:FetchedResults<ToDoItem>
+    @State private var newToDoItem = ""
     var body: some View {
-        Text("Hello, World!")
+        NavigationView{
+            List{
+                Section(header: Text("What's next?")){
+                    HStack{
+                        TextField("New item", text: self.$newToDoItem)
+                        Button(action: {
+                            let toDoItem = ToDoItem(context: self.managedObjectContext)
+                            toDoItem.title = self.newToDoItem
+                            toDoItem.createdAt = Date()
+                            
+                            do {
+                                try self.managedObjectContext.save()
+                            } catch {
+                                print(error)
+                            }
+                            
+                            self.newToDoItem = ""
+                        }){
+                            Image(systemName: "plus")
+                                .imageScale(.large)
+                        }
+                    }
+                }.font(.headline)
+            }
+            .navigationBarTitle(Text("My To Do"))
+            .navigationBarItems(trailing: EditButton())
+        }
+    
     }
 }
 
