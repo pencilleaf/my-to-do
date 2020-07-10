@@ -53,6 +53,7 @@
 		4C06D77524B6F4BB002AF3D1 /* MyToDoUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyToDoUITests.swift; sourceTree = "<group>"; };
 		4C06D77724B6F4BB002AF3D1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4C06D78324B86E0D002AF3D1 /* ToDoItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoItem.swift; sourceTree = "<group>"; };
+		4C06D78524B8860C002AF3D1 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +84,7 @@
 		4C06D74424B6F4B7002AF3D1 = {
 			isa = PBXGroup;
 			children = (
+				4C06D78524B8860C002AF3D1 /* .gitignore */,
 				4C06D74F24B6F4B7002AF3D1 /* MyToDo */,
 				4C06D76924B6F4BB002AF3D1 /* MyToDoTests */,
 				4C06D77424B6F4BB002AF3D1 /* MyToDoUITests */,
