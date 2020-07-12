@@ -9,9 +9,10 @@
 import SwiftUI
 
 struct ToDoItemView: View {
-    var title:String = ""
-    var dueAt:Date
-    var checked:Bool
+    @Environment(\.managedObjectContext) var managedObjectContext
+    @FetchRequest(fetchRequest: ToDoItem.getAllToDoItems()) var toDoItems:FetchedResults<ToDoItem>
+    
+    var item:ToDoItem
     
     var dateFormatter: DateFormatter {
         let dateFormatter = DateFormatter()
@@ -20,25 +21,41 @@ struct ToDoItemView: View {
         return dateFormatter
     }
     
+    func toggleChecked(item: ToDoItem?) {
+        guard let item = item else { return }
+        guard let index = self.toDoItems.firstIndex(of: item) else { return }
+        self.toDoItems[index].checked.toggle()
+        
+        do {
+            try self.managedObjectContext.save()
+        } catch {
+            print(error)
+        }
+    }
+    
     var body: some View {
         HStack{
-            Image(systemName: checked ? "checkmark.circle.fill": "circle")
+            Image(systemName: item.checked ? "checkmark.circle.fill": "circle")
                 .imageScale(.large)
                 .padding()
-            VStack(alignment: .leading){
-                Text(title)
-                    .font(.headline)
-                Text("By \(dueAt, formatter: dateFormatter)")
-                    .font(.caption)
+                .onTapGesture {
+                    self.toggleChecked(item: self.item)
+                }
+            NavigationLink(destination: ToDoEditView(item: self.item)){
+                VStack(alignment: .leading){
+                    Text(item.title!)
+                        .font(.headline)
+                    Text("By \(item.dueAt!, formatter: dateFormatter)")
+                        .font(.caption)
+                }
             }
+            
         }
     }
 }
 
 struct ToDoItemView_Previews: PreviewProvider {
     static var previews: some View {
-        ToDoItemView(title: "My todo",
-                     dueAt: Date(),
-                     checked: true)
+        ToDoItemView(item: ToDoItem())
     }
 }

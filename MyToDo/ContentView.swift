@@ -21,27 +21,13 @@ struct ContentView: View {
         return min...max
     }
     
-    func toggleChecked(item: ToDoItem?) {
-        guard let item = item else { return }
-        guard let index = self.toDoItems.firstIndex(of: item) else { return }
-        self.toDoItems[index].checked.toggle()
-        
-        do {
-            try self.managedObjectContext.save()
-        } catch {
-            print(error)
-        }
-    }
-    
     var body: some View {
         NavigationView{
             VStack(alignment: .leading) {
                 List{
                     ForEach(self.toDoItems){toDoItem in
-                        ToDoItemView(title: toDoItem.title!, dueAt: toDoItem.dueAt!, checked: toDoItem.checked)
-                        .onTapGesture {
-                            self.toggleChecked(item: toDoItem)
-                        }
+                        ToDoItemView(item: toDoItem)
+                        
                     }
                     .onDelete {indexSet in
                         let deleteItem = self.toDoItems[indexSet.first!]
@@ -68,15 +54,9 @@ struct ContentView: View {
                     }.padding()
                 .popover(isPresented: $showPopover){
                     NavigationView {
-//                            Text("Due Date")
-//                                .bold()
-//                                .padding()
                         Form {
                             Section (header: Text("Details")){
                                 TextField("Add a new task", text: self.$newToDoItem)
-                                //                                .frame(height: 50)
-                                //                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                //                                .padding(EdgeInsets(top:0, leading:20, bottom:0, trailing:20))
                                 DatePicker("Due Date",
                                     selection: self.$dueAt,
                                     in: self.dateClosedRange,
@@ -104,14 +84,9 @@ struct ContentView: View {
                                 }){
                                     HStack {
                                         Image(systemName: "plus")
-//                                            .foregroundColor(Color.white)
                                         Text("Add new task")
-//                                            .foregroundColor(Color.white)
                                     }
                                 }
-//                                    .frame(width: 250, height:45)
-//                                    .background(Color.blue)
-//                                    .cornerRadius(8)
                             }
                         }
                         .navigationBarTitle(Text("Add Task"))
