@@ -12,9 +12,29 @@ struct ContentView: View {
     @Environment(\.managedObjectContext) var managedObjectContext
     @FetchRequest(fetchRequest: ToDoItem.getAllToDoItems()) var toDoItems:FetchedResults<ToDoItem>
     @State private var newToDoItem = ""
+    @State private var dueAt = Date()
+    
     var body: some View {
         NavigationView{
             List{
+                Section(header: Text("To Dos")){
+                    ForEach(self.toDoItems){toDoItem in
+                        ToDoItemView(title: toDoItem.title!, dueAt: Date(), checked: toDoItem.checked)
+                        .onTapGesture {
+                            self.toggleChecked(item: toDoItem)
+                        }
+                    }
+                    .onDelete {indexSet in
+                        let deleteItem = self.toDoItems[indexSet.first!]
+                        self.managedObjectContext.delete(deleteItem)
+                        
+                        do {
+                            try self.managedObjectContext.save()
+                        } catch {
+                            print(error)
+                        }
+                    }
+                }
                 Section(header: Text("What's next?")){
                     HStack{
                         TextField("New item", text: self.$newToDoItem)
@@ -22,6 +42,8 @@ struct ContentView: View {
                             let toDoItem = ToDoItem(context: self.managedObjectContext)
                             toDoItem.title = self.newToDoItem
                             toDoItem.createdAt = Date()
+                            toDoItem.dueAt = self.dueAt
+                            toDoItem.checked = false
                             
                             do {
                                 try self.managedObjectContext.save()
@@ -36,26 +58,22 @@ struct ContentView: View {
                         }
                     }
                 }.font(.headline)
-                
-                Section(header: Text("To Dos")){
-                    ForEach(self.toDoItems){toDoItem in
-                        ToDoItemView(title: toDoItem.title!, createdAt: "\(toDoItem.createdAt!)")
-                    }.onDelete {indexSet in
-                        let deleteItem = self.toDoItems[indexSet.first!]
-                        self.managedObjectContext.delete(deleteItem)
-                        
-                        do {
-                            try self.managedObjectContext.save()
-                        } catch {
-                            print(error)
-                        }
-                    }
-                }
             }
-            .navigationBarTitle(Text("My To Do"))
+            .navigationBarTitle(Text("To Do's"))
             .navigationBarItems(trailing: EditButton())
         }
+    }
     
+    func toggleChecked(item: ToDoItem?) {
+        guard let item = item else { return }
+        guard let index = self.toDoItems.firstIndex(of: item) else { return }
+        self.toDoItems[index].checked.toggle()
+        
+        do {
+            try self.managedObjectContext.save()
+        } catch {
+            print(error)
+        }
     }
 }
 

@@ -10,14 +10,25 @@ import SwiftUI
 
 struct ToDoItemView: View {
     var title:String = ""
-    var createdAt:String = ""
+    var dueAt:Date
+    var checked:Bool
+    
+    var dateFormatter: DateFormatter {
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeStyle = .short
+        dateFormatter.dateStyle = .long
+        return dateFormatter
+    }
     
     var body: some View {
         HStack{
+            Image(systemName: checked ? "checkmark.circle.fill": "circle")
+                .imageScale(.large)
+                .padding()
             VStack(alignment: .leading){
                 Text(title)
                     .font(.headline)
-                Text(createdAt)
+                Text("\(dueAt, formatter: dateFormatter)")
                     .font(.caption)
             }
         }
@@ -27,6 +38,7 @@ struct ToDoItemView: View {
 struct ToDoItemView_Previews: PreviewProvider {
     static var previews: some View {
         ToDoItemView(title: "My todo",
-                     createdAt: "Today")
+                     dueAt: Date(),
+                     checked: true)
     }
 }
