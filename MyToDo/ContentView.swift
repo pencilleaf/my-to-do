@@ -13,13 +13,32 @@ struct ContentView: View {
     @FetchRequest(fetchRequest: ToDoItem.getAllToDoItems()) var toDoItems:FetchedResults<ToDoItem>
     @State private var newToDoItem = ""
     @State private var dueAt = Date()
+    @State var showPopover = false
+    
+    var dateClosedRange: ClosedRange<Date> {
+        let min = Calendar.current.date(byAdding: .day, value:0, to: Date())!
+        let max = Calendar.current.date(byAdding: .day, value:30, to: Date())!
+        return min...max
+    }
+    
+    func toggleChecked(item: ToDoItem?) {
+        guard let item = item else { return }
+        guard let index = self.toDoItems.firstIndex(of: item) else { return }
+        self.toDoItems[index].checked.toggle()
+        
+        do {
+            try self.managedObjectContext.save()
+        } catch {
+            print(error)
+        }
+    }
     
     var body: some View {
         NavigationView{
-            List{
-                Section(header: Text("To Dos")){
+            VStack(alignment: .leading) {
+                List{
                     ForEach(self.toDoItems){toDoItem in
-                        ToDoItemView(title: toDoItem.title!, dueAt: Date(), checked: toDoItem.checked)
+                        ToDoItemView(title: toDoItem.title!, dueAt: toDoItem.dueAt!, checked: toDoItem.checked)
                         .onTapGesture {
                             self.toggleChecked(item: toDoItem)
                         }
@@ -34,51 +53,85 @@ struct ContentView: View {
                             print(error)
                         }
                     }
+                        
                 }
-                Section(header: Text("What's next?")){
+                Button(action: {
+                    self.showPopover = true
+                }) {
                     HStack{
-                        TextField("New item", text: self.$newToDoItem)
-                        Button(action: {
-                            let toDoItem = ToDoItem(context: self.managedObjectContext)
-                            toDoItem.title = self.newToDoItem
-                            toDoItem.createdAt = Date()
-                            toDoItem.dueAt = self.dueAt
-                            toDoItem.checked = false
-                            
-                            do {
-                                try self.managedObjectContext.save()
-                            } catch {
-                                print(error)
+                        Image(systemName: "plus.circle.fill")
+                            .resizable()
+                            .frame(width:20, height:20)
+                        Text("Add new task")
+                    }
+                    
+                    }.padding()
+                .popover(isPresented: $showPopover){
+                    NavigationView {
+//                            Text("Due Date")
+//                                .bold()
+//                                .padding()
+                        Form {
+                            Section (header: Text("Details")){
+                                TextField("Add a new task", text: self.$newToDoItem)
+                                //                                .frame(height: 50)
+                                //                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                //                                .padding(EdgeInsets(top:0, leading:20, bottom:0, trailing:20))
+                                DatePicker("Due Date",
+                                    selection: self.$dueAt,
+                                    in: self.dateClosedRange,
+                                    displayedComponents: [.hourAndMinute, .date])
+                                .datePickerStyle(DefaultDatePickerStyle())
                             }
                             
-                            self.newToDoItem = ""
-                        }){
-                            Image(systemName: "plus")
-                                .imageScale(.large)
+                            Section {
+                                Button(action: {
+                                    let toDoItem = ToDoItem(context: self.managedObjectContext)
+                                    toDoItem.title = self.newToDoItem
+                                    toDoItem.createdAt = Date()
+                                    toDoItem.dueAt = self.dueAt
+                                    toDoItem.checked = false
+                                    
+                                    do {
+                                        try self.managedObjectContext.save()
+                                    } catch {
+                                        print(error)
+                                    }
+                                    
+                                    self.newToDoItem = ""
+                                    self.dueAt = Date()
+                                    self.showPopover.toggle()
+                                }){
+                                    HStack {
+                                        Image(systemName: "plus")
+//                                            .foregroundColor(Color.white)
+                                        Text("Add new task")
+//                                            .foregroundColor(Color.white)
+                                    }
+                                }
+//                                    .frame(width: 250, height:45)
+//                                    .background(Color.blue)
+//                                    .cornerRadius(8)
+                            }
                         }
+                        .navigationBarTitle(Text("Add Task"))
+                            .navigationBarItems(leading: Button(action: {
+                                self.showPopover.toggle()
+                            }){
+                                Text("Cancel")
+                            })
                     }
-                }.font(.headline)
+                }
+                
             }
             .navigationBarTitle(Text("To Do's"))
             .navigationBarItems(trailing: EditButton())
         }
-    }
-    
-    func toggleChecked(item: ToDoItem?) {
-        guard let item = item else { return }
-        guard let index = self.toDoItems.firstIndex(of: item) else { return }
-        self.toDoItems[index].checked.toggle()
-        
-        do {
-            try self.managedObjectContext.save()
-        } catch {
-            print(error)
-        }
-    }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
     }
+}
 }

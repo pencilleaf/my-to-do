@@ -28,7 +28,7 @@ struct ToDoItemView: View {
             VStack(alignment: .leading){
                 Text(title)
                     .font(.headline)
-                Text("\(dueAt, formatter: dateFormatter)")
+                Text("By \(dueAt, formatter: dateFormatter)")
                     .font(.caption)
             }
         }
