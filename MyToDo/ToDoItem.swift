@@ -20,7 +20,7 @@ extension ToDoItem {
     static func getAllToDoItems() -> NSFetchRequest<ToDoItem> {
         let request:NSFetchRequest<ToDoItem> = ToDoItem.fetchRequest() as! NSFetchRequest<ToDoItem>
         
-        let sortDescriptor = NSSortDescriptor(key: "createdAt", ascending: true)
+        let sortDescriptor = NSSortDescriptor(key: "dueAt", ascending: true)
         
         request.sortDescriptors = [sortDescriptor]
         
